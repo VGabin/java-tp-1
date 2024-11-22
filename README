@@ -3,3 +3,6 @@ Il suffit de lancer :
 mvn javafx:run
 
 Et l'application se lanc :D
+
+Ligne 99 dans "App.java" il s'agit de ma clé API, ne sachant pas comment faire l'équialent d'un .env en web, je l'ai mise dans une variable, s'il vous plait, allez chercher la votre
+sur ce site : https://app.abstractapi.com/api/ip-geolocation/tester
