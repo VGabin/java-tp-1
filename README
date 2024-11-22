@@ -1,0 +1,5 @@
+Il suffit de lancer : 
+
+mvn javafx:run
+
+Et l'application se lanc :D
