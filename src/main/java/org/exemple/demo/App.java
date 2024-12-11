@@ -22,8 +22,7 @@ import org.json.*;
 
 public class App extends Application {
 
-    private TargetDataLine microphone;
-    private File audioFile = new File("audio.wav");
+    public TargetDataLine microphone;
 
     @Override
     public void start(Stage stage) {
@@ -35,9 +34,9 @@ public class App extends Application {
         Button takePhoto = new Button("Prendre une photo");
         Button showCoords = new Button("Afficher les coordonnées");
 
-        startRecording.setOnAction(e -> startRecording());
+        startRecording.setOnAction(e -> startRecording(null));
         stopRecording.setOnAction(e -> stopRecording());
-        takePhoto.setOnAction(e -> takePhoto());
+        takePhoto.setOnAction(e -> takePhoto(null));
         showCoords.setOnAction(e -> showCoords());
 
         root.getChildren().addAll(startRecording, stopRecording, takePhoto, showCoords);
@@ -48,16 +47,25 @@ public class App extends Application {
         stage.show();
     }
 
-    private void startRecording() {
+    public void startRecording(String fileName) {
         try {
+            if (fileName == null || fileName.trim().isEmpty()) {
+                fileName = "audio.wav";
+            } else {
+                fileName += ".wav";
+            }
+    
+            File audioFile = new File(fileName);
+    
             AudioFormat format = new AudioFormat(44100.0f, 16, 2, true, true);
             DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
             microphone = (TargetDataLine) AudioSystem.getLine(info);
             microphone.open(format);
             microphone.start();
-            
-            System.out.println("Début de l'enregistrement");
-
+    
+            System.out.println("Début de l'enregistrement : " + fileName);
+    
+            // Thread pour enregistrer l'audio dans le fichier
             Thread thread = new Thread(() -> {
                 try (AudioInputStream ais = new AudioInputStream(microphone)) {
                     AudioSystem.write(ais, AudioFileFormat.Type.WAVE, audioFile);
@@ -67,11 +75,12 @@ public class App extends Application {
             });
             thread.start();
         } catch (LineUnavailableException ex) {
+            System.out.println("Erreur lors de l'enregistrement");
             ex.printStackTrace();
         }
     }
 
-    private void stopRecording() {
+    public void stopRecording() {
         if (microphone != null) {
             microphone.stop();
             microphone.close();
@@ -80,11 +89,17 @@ public class App extends Application {
         }
     }
 
-    private void takePhoto() {
+    public void takePhoto(String fileName) {
         Webcam webcam = Webcam.getDefault();
         webcam.open();
         try {
-            ImageIO.write(webcam.getImage(), "PNG", new File("photo.png"));
+            if (fileName == null || fileName.trim().isEmpty()) {
+                fileName = "photo.png";
+            } else {
+                fileName += ".png";
+            }
+
+            ImageIO.write(webcam.getImage(), "PNG", new File(fileName));
         } catch (IOException ex) {
             ex.printStackTrace();
         } finally {
@@ -92,7 +107,7 @@ public class App extends Application {
         }
     }
 
-    private void showCoords() {
+    public void showCoords() {
         GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
         JSONObject ipResponse = new JSONObject(apiCall("https://api.ipify.org/?format=json"));
 
@@ -105,7 +120,7 @@ public class App extends Application {
         System.out.println("Longitude : " + coordinate.y);
     }
 
-    private String apiCall(String url) {
+    public String apiCall(String url) {
         try {
             URI newUrl = new URI(url);
 
